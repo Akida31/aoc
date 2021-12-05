@@ -1,0 +1,23 @@
+[package]
+name = "aoc2021"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+regex = "1.5"
+
+[[bin]]
+name = "2021-1"
+path = "src/day1.rs"
+[[bin]]
+name = "2021-2"
+path = "src/day2.rs"
+[[bin]]
+name = "2021-3"
+path = "src/day3.rs"
+[[bin]]
+name = "2021-4"
+path = "src/day4.rs"
+[[bin]]
+name = "2021-5"
+path = "src/day5.rs"
