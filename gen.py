@@ -1,23 +1,42 @@
 import datetime
 from os import path
-from sys import argv
+import sys
+import requests
+
+
+def fetch_input(year, day):
+    with open(path.join(path.dirname(__file__), ".session.txt")) as session_file:
+        session = session_file.read().strip()
+    resp = requests.get(
+            f"https://adventofcode.com/{year}/day/{day}/input",
+            cookies={"session": session}
+    )
+    if not resp.ok:
+        return None
+    return resp.text.strip()
 
 
 def edit_cargo(year, day):
-    with open(f"aoc{year}/Cargo.toml", "a") as f:
-        f.write(f"""[[bin]]
+    with open(f"aoc{year}/Cargo.toml", "a") as cargo_file:
+        cargo_file.write(f"""[[bin]]
 name = "{year}-{day}"
 path = "src/day{day}.rs"
 """)
 
 
 def create_template(year, day):
-    open(f"aoc{year}/inputs/day{day}.txt", "a").close()
+    with open(f"aoc{year}/inputs/day{day}.txt", "a") as input_file:
+        inp = fetch_input(year, day)
+        if inp is None:
+            print("could not fetch input")
+        else:
+            input_file.write(inp)
     p = f"aoc{year}/src/day{day}.rs"
     if path.exists(p):
-        quit(f"{p} exists already")
-    with open(p, "w") as f:
-        f.write("""fn main() {
+        print(f"{p} exists already")
+        sys.exit(1)
+    with open(p, "w") as src_file:
+        src_file.write("""fn main() {
     let input: Vec<_> = include_str!("../inputs/day@day@.txt").lines().collect();
     println!("Day @day@, Solution 1: {}", solve1(input.clone()));
     println!("Day @day@, Solution 2: {}", solve2(input));
@@ -33,10 +52,10 @@ fn solve2(input: Vec<&str>) -> usize {
 
 
 def get_day():
-    if len(argv) < 3:
+    if len(sys.argv) < 3:
         day = input("Day: ")
     else:
-        day = argv[2]
+        day = sys.argv[2]
     try:
         day = int(day)
     except ValueError:
@@ -51,10 +70,10 @@ def get_day():
     return day
 
 def get_year():
-    if len(argv) < 3:
+    if len(sys.argv) < 3:
         year = input("Year: ")
     else:
-        year = argv[1]
+        year = sys.argv[1]
     try:
         year = int(year)
     except ValueError:
@@ -69,7 +88,7 @@ def get_year():
     return year
 
 if __name__ == "__main__":
-    if len(argv) == 2 and argv[1] == ".":
+    if len(sys.argv) == 2 and sys.argv[1] == ".":
         date = datetime.datetime.now()
         day = date.day
         year = date.year
